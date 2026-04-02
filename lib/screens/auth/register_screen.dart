@@ -47,6 +47,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: 16),
+                Center(
+                  child: ClipRect(
+                    child: Align(
+                      alignment: Alignment.center,
+                      heightFactor: 0.6,
+                      child: Image.asset(
+                        'lib/assets/images/artiselle-icon.png',
+                        height: 240,
+                      ),
+                    ),
+                  ),
+                ),
                 Text(
                   'Create Account',
                   style: theme.textTheme.headlineMedium
@@ -110,8 +122,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 const SizedBox(height: 24),
 
                 // Role selector
-                Text('I am a…', style: theme.textTheme.labelLarge),
-                const SizedBox(height: 8),
                 Row(
                   children: UserRole.values.map((role) {
                     final selected = _selectedRole == role;
