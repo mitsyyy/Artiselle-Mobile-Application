@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # artiselle
 
 A new Flutter project.
@@ -15,3 +16,7 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
+=======
+# Artiselle-Mobile-Application
+Artiselle is an e-commerce platform designed to connect buyers with sellers of unique items, such as handmade goods, clothing, and books. The application supports small businesses, artisans, and independent authors by providing them with a space to sell their products directly to consumers.
+>>>>>>> 6692c8d40080273a19ff95db25764dc9109b4618
