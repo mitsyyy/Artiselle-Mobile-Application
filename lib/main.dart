@@ -1,37 +1,31 @@
 import 'package:flutter/material.dart';
+import 'utils/router.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const ArtiselleApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class ArtiselleApp extends StatelessWidget {
+  const ArtiselleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'My App',
+      title: 'Artiselle',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF6B4EFF),
+          brightness: Brightness.light,
+        ),
         useMaterial3: true,
+        inputDecorationTheme: const InputDecorationTheme(
+          filled: true,
+          fillColor: Color(0xFFF5F5F5),
+        ),
       ),
-      home: const HomePage(),
-    );
-  }
-}
-
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('My App'),
-      ),
-      body: const Center(
-        child: Text('Hello, World!'),
-      ),
+      onGenerateRoute: generateRoute,
+      initialRoute: AppRoutes.login,
     );
   }
 }
