@@ -5,6 +5,7 @@ import 'providers/auth_provider.dart';
 import 'providers/cart_provider.dart';
 import 'providers/order_provider.dart';
 import 'providers/product_provider.dart';
+import 'providers/store_provider.dart';
 import 'utils/router.dart';
 
 void main() {
@@ -17,6 +18,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => ProductProvider()),
         ChangeNotifierProvider(create: (_) => CartProvider()),
         ChangeNotifierProvider(create: (_) => OrderProvider()),
+        ChangeNotifierProvider(create: (_) => StoreProvider()),
       ],
       child: const ArtiselleApp(),
     ),
