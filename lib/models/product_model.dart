@@ -31,18 +31,28 @@ class ProductModel {
 
   bool get isOutOfStock => stock <= 0;
 
-  ProductModel copyWith({int? stock, double? averageRating, int? reviewCount}) {
+  ProductModel copyWith({
+    String? title,
+    String? description,
+    double? price,
+    String? categoryId,
+    int? stock,
+    List<String>? imageUrls,
+    bool? isActive,
+    double? averageRating,
+    int? reviewCount,
+  }) {
     return ProductModel(
       id: id,
       sellerId: sellerId,
       sellerStoreName: sellerStoreName,
-      title: title,
-      description: description,
-      price: price,
-      categoryId: categoryId,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      price: price ?? this.price,
+      categoryId: categoryId ?? this.categoryId,
       stock: stock ?? this.stock,
-      imageUrls: imageUrls,
-      isActive: isActive,
+      imageUrls: imageUrls ?? this.imageUrls,
+      isActive: isActive ?? this.isActive,
       createdAt: createdAt,
       averageRating: averageRating ?? this.averageRating,
       reviewCount: reviewCount ?? this.reviewCount,
