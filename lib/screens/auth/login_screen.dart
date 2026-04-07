@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
+import '../../providers/auth_provider.dart';
+import '../../models/user_model.dart';
+import '../../utils/router.dart';
 import '../../utils/validators.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -28,9 +32,24 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _errorMessage = null);
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
-    // TODO: wire up AuthProvider.signInWithEmail()
-    await Future.delayed(const Duration(milliseconds: 300));
+
+    final error = await context.read<AuthProvider>().signInWithEmail(
+          _emailController.text,
+          _passwordController.text,
+        );
+
+    if (!mounted) return;
     setState(() => _isLoading = false);
+
+    if (error != null) {
+      setState(() => _errorMessage = error);
+      return;
+    }
+
+    final role = context.read<AuthProvider>().currentUser?.role;
+    final route =
+        role == UserRole.seller ? AppRoutes.sellerHome : AppRoutes.buyerHome;
+    Navigator.pushReplacementNamed(context, route);
   }
 
   @override
