@@ -15,7 +15,7 @@ class _OfflineBannerState extends State<OfflineBanner> {
   void initState() {
     super.initState();
     _checkConnectivity();
-    Connectivity().onConnectivityCanged.listen((results) {
+    Connectivity().onConnectivityChanged.listen((results) {
       _updateStatus(results);
     });
   }
