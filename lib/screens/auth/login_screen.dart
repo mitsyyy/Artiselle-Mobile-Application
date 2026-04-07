@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../utils/validators.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -173,7 +174,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   },
                   style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14)),
-                  icon: const Icon(Icons.g_mobiledata, size: 24),
+                  icon: SvgPicture.asset(
+                    'lib/assets/images/google_logo.svg',
+                    width: 20,
+                    height: 20,
+                  ),
                   label: const Text('Continue with Google'),
                 ),
                 const SizedBox(height: 24),
