@@ -21,6 +21,44 @@ final _seedOrders = [
     status: ShipmentStatus.delivered,
     createdAt: DateTime(2024, 4, 1),
   ),
+  OrderModel(
+    id: 'order-seed-002',
+    buyerId: 'static-buyer-001',
+    sellerId: 'static-seller-001',
+    items: [
+      const OrderItem(
+        productId: 'prod-1',
+        productTitle: 'Hand-woven Basket',
+        unitPrice: 450.00,
+        quantity: 2,
+        imageUrl: 'https://picsum.photos/seed/basket/400/400',
+      ),
+    ],
+    totalAmount: 900.00,
+    shippingAddress: '456 Sample Ave, Manila, 1000',
+    paymentMethod: 'PayPal',
+    status: ShipmentStatus.pending,
+    createdAt: DateTime(2026, 4, 1),
+  ),
+  OrderModel(
+    id: 'order-seed-003',
+    buyerId: 'static-buyer-001',
+    sellerId: 'static-seller-001',
+    items: [
+      const OrderItem(
+        productId: 'prod-2',
+        productTitle: 'Embroidered Tote Bag',
+        unitPrice: 320.00,
+        quantity: 1,
+        imageUrl: 'https://picsum.photos/seed/tote/400/400',
+      ),
+    ],
+    totalAmount: 320.00,
+    shippingAddress: '789 Demo Rd, Davao City, 8000',
+    paymentMethod: 'GCash',
+    status: ShipmentStatus.shipped,
+    createdAt: DateTime(2026, 3, 28),
+  ),
 ];
 
 class OrderProvider extends ChangeNotifier {
@@ -30,6 +68,19 @@ class OrderProvider extends ChangeNotifier {
     final list = _orders.where((o) => o.buyerId == buyerId).toList();
     list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
     return list;
+  }
+
+  List<OrderModel> ordersForSeller(String sellerId) {
+    final list = _orders.where((o) => o.sellerId == sellerId).toList();
+    list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    return list;
+  }
+
+  void updateStatus(String orderId, ShipmentStatus status) {
+    final idx = _orders.indexWhere((o) => o.id == orderId);
+    if (idx == -1) return;
+    _orders[idx] = _orders[idx].copyWith(status: status);
+    notifyListeners();
   }
 
   OrderModel? getById(String id) {
