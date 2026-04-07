@@ -51,6 +51,22 @@ final _seedProducts = [
     imageUrls: ['https://picsum.photos/seed/journal/400/400'],
     createdAt: DateTime(2024, 3, 18), averageRating: 4.6, reviewCount: 9,
   ),
+  ProductModel(
+    id: 'prod-7', sellerId: 'static-seller-001', sellerStoreName: 'My Artisan Shop',
+    title: 'Hand-woven Basket',
+    description: 'A beautiful hand-woven basket made from natural rattan.',
+    price: 450.00, categoryId: 'cat-1', stock: 10,
+    imageUrls: ['https://picsum.photos/seed/basket/400/400'],
+    createdAt: DateTime(2026, 3, 1), averageRating: 4.5, reviewCount: 2,
+  ),
+  ProductModel(
+    id: 'prod-8', sellerId: 'static-seller-001', sellerStoreName: 'My Artisan Shop',
+    title: 'Embroidered Tote Bag',
+    description: 'Handmade tote bag with floral embroidery. Eco-friendly canvas material.',
+    price: 320.00, categoryId: 'cat-2', stock: 5,
+    imageUrls: ['https://picsum.photos/seed/tote/400/400'],
+    createdAt: DateTime(2026, 3, 5), averageRating: 4.8, reviewCount: 3,
+  ),
 ];
 
 final _seedReviews = <String, List<ReviewModel>>{
@@ -136,6 +152,44 @@ class ProductProvider extends ChangeNotifier {
     _sortBy = sortBy;
     notifyListeners();
   }
+
+  // ── Seller methods ──────────────────────────────────────────────────────────
+
+  List<ProductModel> getBySellerAll(String sellerId) =>
+      _products.where((p) => p.sellerId == sellerId).toList();
+
+  void addProduct(ProductModel product) {
+    _products = [product, ..._products];
+    notifyListeners();
+  }
+
+  void updateProduct(ProductModel updated) {
+    _products = _products.map((p) => p.id == updated.id ? updated : p).toList();
+    notifyListeners();
+  }
+
+  void deleteProduct(String productId) {
+    _products = _products.where((p) => p.id != productId).toList();
+    notifyListeners();
+  }
+
+  void toggleActive(String productId) {
+    _products = _products.map((p) {
+      if (p.id == productId) return p.copyWith(isActive: !p.isActive);
+      return p;
+    }).toList();
+    notifyListeners();
+  }
+
+  void updateStock(String productId, int newStock) {
+    _products = _products.map((p) {
+      if (p.id == productId) return p.copyWith(stock: newStock);
+      return p;
+    }).toList();
+    notifyListeners();
+  }
+
+  // ── Review method ────────────────────────────────────────────────────────────
 
   void addReview(ReviewModel review) {
     _reviews[review.productId] = [
