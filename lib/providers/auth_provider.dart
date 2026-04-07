@@ -10,6 +10,13 @@ const _staticAccounts = [
     'displayName': 'Test Buyer',
     'role': 'buyer',
   },
+  {
+    'uid': 'static-seller-001',
+    'email': 'seller@artiselle.com',
+    'password': 'seller123',
+    'displayName': 'Test Seller',
+    'role': 'seller',
+  },
 ];
 
 class AuthProvider extends ChangeNotifier {
