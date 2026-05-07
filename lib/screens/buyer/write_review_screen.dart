@@ -21,6 +21,7 @@ class WriteReviewScreen extends StatefulWidget {
 class _WriteReviewScreenState extends State<WriteReviewScreen> {
   int _rating = 0;
   final _feedbackController = TextEditingController();
+  bool _isSubmitting = false;
 
   @override
   void dispose() {
@@ -28,7 +29,7 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
     super.dispose();
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     if (_rating == 0) {
       ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Please select a rating.')));
@@ -40,9 +41,11 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
       return;
     }
 
+    setState(() => _isSubmitting = true);
+
     final user = context.read<AuthProvider>().currentUser!;
     final review = ReviewModel(
-      id: 'rev-${DateTime.now().millisecondsSinceEpoch}',
+      id: '', // Will be assigned by Firestore
       productId: widget.productId,
       orderId: widget.orderId,
       buyerId: user.uid,
@@ -52,10 +55,18 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
       createdAt: DateTime.now(),
     );
 
-    context.read<ProductProvider>().addReview(review);
-    Navigator.pop(context);
-    ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Review submitted. Thank you!')));
+    try {
+      await context.read<ProductProvider>().addReview(review);
+      if (!mounted) return;
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Review submitted. Thank you!')));
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _isSubmitting = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to submit review. Please try again.')));
+    }
   }
 
   @override
@@ -100,9 +111,12 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
             ),
             const SizedBox(height: 24),
             FilledButton(
-              onPressed: _submit,
+              onPressed: _isSubmitting ? null : _submit,
               style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(48)),
-              child: const Text('Submit Review'),
+              child: _isSubmitting
+                  ? const SizedBox(height: 20, width: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                  : const Text('Submit Review'),
             ),
           ],
         ),

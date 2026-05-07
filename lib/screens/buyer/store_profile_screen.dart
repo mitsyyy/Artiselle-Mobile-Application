@@ -1,28 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/product_provider.dart';
+import '../../providers/store_provider.dart';
 import '../../widgets/cart_badge.dart';
 import '../../widgets/product_card.dart';
 
-// Static store data keyed by sellerId
-final _staticStores = {
-  'seller-1': {'name': 'Crafty Corner', 'description': 'Handmade goods with love from Cebu.'},
-  'seller-2': {'name': 'The Book Nook', 'description': 'Independent books and journals.'},
-  'seller-3': {'name': 'Silver & Stone', 'description': 'Artisan jewelry and fine art prints.'},
-};
-
-class StoreProfileScreen extends StatelessWidget {
+class StoreProfileScreen extends StatefulWidget {
   final String sellerId;
   const StoreProfileScreen({super.key, required this.sellerId});
 
   @override
+  State<StoreProfileScreen> createState() => _StoreProfileScreenState();
+}
+
+class _StoreProfileScreenState extends State<StoreProfileScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Load store profile from Firestore
+    Future.microtask(() {
+      context.read<StoreProvider>().loadStore(widget.sellerId);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final store = _staticStores[sellerId];
-    final products = context.watch<ProductProvider>().getByStore(sellerId);
+    final store = context.watch<StoreProvider>().getStore(widget.sellerId);
+    final products = context.watch<ProductProvider>().getByStore(widget.sellerId);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(store?['name'] ?? 'Store'),
+        title: Text(store?.storeName ?? 'Store'),
         actions: const [CartBadge()],
       ),
       body: CustomScrollView(
@@ -37,20 +45,25 @@ class StoreProfileScreen extends StatelessWidget {
                     CircleAvatar(
                       radius: 32,
                       backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                      child: Text(
-                        (store?['name'] ?? 'S')[0],
-                        style: TextStyle(fontSize: 24,
-                            color: Theme.of(context).colorScheme.onPrimaryContainer),
-                      ),
+                      backgroundImage: store?.profileImageUrl != null
+                          ? NetworkImage(store!.profileImageUrl!)
+                          : null,
+                      child: store?.profileImageUrl == null
+                          ? Text(
+                              (store?.storeName ?? 'S')[0],
+                              style: TextStyle(fontSize: 24,
+                                  color: Theme.of(context).colorScheme.onPrimaryContainer),
+                            )
+                          : null,
                     ),
                     const SizedBox(width: 16),
                     Expanded(child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(store?['name'] ?? 'Unknown Store',
+                        Text(store?.storeName ?? 'Unknown Store',
                             style: Theme.of(context).textTheme.titleLarge
                                 ?.copyWith(fontWeight: FontWeight.bold)),
-                        Text(store?['description'] ?? '',
+                        Text(store?.description ?? '',
                             style: const TextStyle(color: Colors.grey)),
                       ],
                     )),

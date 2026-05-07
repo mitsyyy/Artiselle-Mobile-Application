@@ -8,8 +8,22 @@ import '../../widgets/cart_badge.dart';
 import '../../widgets/offline_banner.dart';
 import '../../widgets/product_card.dart';
 
-class BuyerHomeScreen extends StatelessWidget {
+class BuyerHomeScreen extends StatefulWidget {
   const BuyerHomeScreen({super.key});
+
+  @override
+  State<BuyerHomeScreen> createState() => _BuyerHomeScreenState();
+}
+
+class _BuyerHomeScreenState extends State<BuyerHomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Load products from Firestore on first build
+    Future.microtask(() {
+      context.read<ProductProvider>().loadProducts();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -87,20 +101,25 @@ class BuyerHomeScreen extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: products.isEmpty
-                ? const Center(child: Text('No products found.'))
-                : GridView.builder(
-                    padding: const EdgeInsets.all(12),
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      childAspectRatio: 0.72,
-                      crossAxisSpacing: 10,
-                      mainAxisSpacing: 10,
-                    ),
-                    itemCount: products.length,
-                    itemBuilder: (_, i) => ProductCard(product: products[i]),
-                  ),
+            child: productProvider.isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : products.isEmpty
+                    ? const Center(child: Text('No products found.'))
+                    : RefreshIndicator(
+                        onRefresh: () => context.read<ProductProvider>().loadProducts(),
+                        child: GridView.builder(
+                          padding: const EdgeInsets.all(12),
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            childAspectRatio: 0.72,
+                            crossAxisSpacing: 10,
+                            mainAxisSpacing: 10,
+                          ),
+                          itemCount: products.length,
+                          itemBuilder: (_, i) => ProductCard(product: products[i]),
+                        ),
+                      ),
           ),
         ],
       ),

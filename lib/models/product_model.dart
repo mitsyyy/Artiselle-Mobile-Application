@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class ProductModel {
   final String id;
   final String sellerId;
@@ -30,6 +32,38 @@ class ProductModel {
   });
 
   bool get isOutOfStock => stock <= 0;
+
+  Map<String, dynamic> toMap() => {
+        'sellerId': sellerId,
+        'sellerStoreName': sellerStoreName,
+        'title': title,
+        'description': description,
+        'price': price,
+        'categoryId': categoryId,
+        'stock': stock,
+        'imageUrls': imageUrls,
+        'isActive': isActive,
+        'createdAt': Timestamp.fromDate(createdAt),
+        'averageRating': averageRating,
+        'reviewCount': reviewCount,
+      };
+
+  factory ProductModel.fromMap(String id, Map<String, dynamic> map) =>
+      ProductModel(
+        id: id,
+        sellerId: map['sellerId'] as String,
+        sellerStoreName: map['sellerStoreName'] as String? ?? '',
+        title: map['title'] as String,
+        description: map['description'] as String,
+        price: (map['price'] as num).toDouble(),
+        categoryId: map['categoryId'] as String,
+        stock: (map['stock'] as num).toInt(),
+        imageUrls: List<String>.from(map['imageUrls'] ?? []),
+        isActive: map['isActive'] as bool? ?? true,
+        createdAt: (map['createdAt'] as Timestamp).toDate(),
+        averageRating: (map['averageRating'] as num?)?.toDouble() ?? 0,
+        reviewCount: (map['reviewCount'] as num?)?.toInt() ?? 0,
+      );
 
   ProductModel copyWith({
     String? title,

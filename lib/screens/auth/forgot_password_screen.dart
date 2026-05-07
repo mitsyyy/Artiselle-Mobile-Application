@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../utils/validators.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
@@ -25,8 +27,21 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     setState(() => _errorMessage = null);
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
-    // TODO: wire up AuthProvider.sendPasswordReset()
-    await Future.delayed(const Duration(milliseconds: 300));
+
+    final error = await context
+        .read<AuthProvider>()
+        .sendPasswordReset(_emailController.text);
+
+    if (!mounted) return;
+
+    if (error != null) {
+      setState(() {
+        _isLoading = false;
+        _errorMessage = error;
+      });
+      return;
+    }
+
     setState(() {
       _isLoading = false;
       _emailSent = true;

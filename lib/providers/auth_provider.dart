@@ -1,54 +1,124 @@
 import 'package:flutter/material.dart';
 import '../models/user_model.dart';
-
-// Static test accounts
-const _staticAccounts = [
-  {
-    'uid': 'static-buyer-001',
-    'email': 'buyer@artiselle.com',
-    'password': 'buyer123',
-    'displayName': 'Test Buyer',
-    'role': 'buyer',
-  },
-  {
-    'uid': 'static-seller-001',
-    'email': 'seller@artiselle.com',
-    'password': 'seller123',
-    'displayName': 'Test Seller',
-    'role': 'seller',
-  },
-];
+import '../services/auth_service.dart';
 
 class AuthProvider extends ChangeNotifier {
+  final AuthService _authService = AuthService();
+
   UserModel? _currentUser;
+  bool _isLoading = false;
 
   UserModel? get currentUser => _currentUser;
   bool get isLoggedIn => _currentUser != null;
+  bool get isLoading => _isLoading;
 
-  /// Returns null on success, or an error message string on failure.
-  Future<String?> signInWithEmail(String email, String password) async {
-    final match = _staticAccounts.where(
-      (a) =>
-          a['email'] == email.trim().toLowerCase() &&
-          a['password'] == password,
-    );
+  /// Try to restore session from Firebase Auth on app start.
+  Future<void> tryAutoLogin() async {
+    final firebaseUser = _authService.currentFirebaseUser;
+    if (firebaseUser == null) return;
 
-    if (match.isEmpty) return 'Invalid email or password.';
-
-    final account = match.first;
-    _currentUser = UserModel(
-      uid: account['uid']!,
-      email: account['email']!,
-      displayName: account['displayName']!,
-      role: UserRole.values.firstWhere((r) => r.name == account['role']),
-      emailVerified: true,
-      createdAt: DateTime(2024, 1, 1),
-    );
+    _isLoading = true;
     notifyListeners();
-    return null;
+
+    _currentUser = await _authService.getUserProfile(firebaseUser.uid);
+
+    _isLoading = false;
+    notifyListeners();
   }
 
-  void signOut() {
+  /// Sign in with email and password.
+  /// Returns null on success, or an error message string on failure.
+  Future<String?> signInWithEmail(String email, String password) async {
+    _isLoading = true;
+    notifyListeners();
+
+    final error = await _authService.signInWithEmail(email, password);
+    if (error != null) {
+      _isLoading = false;
+      notifyListeners();
+      return error;
+    }
+
+    // Fetch user profile from Firestore
+    final firebaseUser = _authService.currentFirebaseUser;
+    if (firebaseUser != null) {
+      _currentUser = await _authService.getUserProfile(firebaseUser.uid);
+    }
+
+    _isLoading = false;
+    notifyListeners();
+    return _currentUser == null ? 'Failed to load user profile.' : null;
+  }
+
+  /// Register a new user.
+  /// Returns null on success, or an error message string on failure.
+  Future<String?> register({
+    required String email,
+    required String password,
+    required String displayName,
+    required UserRole role,
+  }) async {
+    _isLoading = true;
+    notifyListeners();
+
+    final error = await _authService.registerWithEmail(
+      email: email,
+      password: password,
+      displayName: displayName,
+      role: role,
+    );
+
+    if (error != null) {
+      _isLoading = false;
+      notifyListeners();
+      return error;
+    }
+
+    // Fetch user profile from Firestore
+    final firebaseUser = _authService.currentFirebaseUser;
+    if (firebaseUser != null) {
+      _currentUser = await _authService.getUserProfile(firebaseUser.uid);
+    }
+
+    _isLoading = false;
+    notifyListeners();
+    return _currentUser == null ? 'Failed to load user profile.' : null;
+  }
+
+  /// Sign in with Google.
+  /// Returns null on success, or an error message string on failure.
+  Future<String?> signInWithGoogle() async {
+    _isLoading = true;
+    notifyListeners();
+
+    final result = await _authService.signInWithGoogle();
+
+    if (result.containsKey('error')) {
+      _isLoading = false;
+      notifyListeners();
+      return result['error'] as String;
+    }
+
+    // Fetch user profile from Firestore
+    final firebaseUser = _authService.currentFirebaseUser;
+    if (firebaseUser != null) {
+      _currentUser = await _authService.getUserProfile(firebaseUser.uid);
+    }
+
+    _isLoading = false;
+    notifyListeners();
+    return _currentUser == null ? 'Failed to load user profile.' : null;
+  }
+
+  /// Send password reset email.
+  /// Returns null on success, or an error message string on failure.
+  Future<String?> sendPasswordReset(String email) async {
+    return await _authService.sendPasswordReset(email);
+  }
+
+  /// Sign out.
+  Future<void> signOut() async {
+    await _authService.signOut();
     _currentUser = null;
     notifyListeners();
   }

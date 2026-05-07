@@ -43,30 +43,35 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       return;
     }
 
-    // Simulate payment delay
-    await Future.delayed(const Duration(seconds: 1));
+    try {
+      final sellerId = cart.items.first.product.sellerId;
+      final order = await orderProvider.placeOrder(
+        buyerId: auth.currentUser!.uid,
+        sellerId: sellerId,
+        items: cart.items.map((i) => OrderItem(
+          productId: i.product.id,
+          productTitle: i.product.title,
+          unitPrice: i.product.price,
+          quantity: i.quantity,
+          imageUrl: i.product.imageUrls.isNotEmpty ? i.product.imageUrls.first : null,
+        )).toList(),
+        totalAmount: cart.subtotal,
+        shippingAddress: _addressController.text.trim(),
+        paymentMethod: _paymentMethod,
+      );
 
-    final sellerId = cart.items.first.product.sellerId;
-    final order = orderProvider.placeOrder(
-      buyerId: auth.currentUser!.uid,
-      sellerId: sellerId,
-      items: cart.items.map((i) => OrderItem(
-        productId: i.product.id,
-        productTitle: i.product.title,
-        unitPrice: i.product.price,
-        quantity: i.quantity,
-        imageUrl: i.product.imageUrls.first,
-      )).toList(),
-      totalAmount: cart.subtotal,
-      shippingAddress: _addressController.text.trim(),
-      paymentMethod: _paymentMethod,
-    );
+      cart.clear();
 
-    cart.clear();
-
-    if (!mounted) return;
-    Navigator.pushReplacementNamed(context, AppRoutes.orderConfirmation,
-        arguments: order.id);
+      if (!mounted) return;
+      Navigator.pushReplacementNamed(context, AppRoutes.orderConfirmation,
+          arguments: order.id);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to place order. Please try again.')),
+      );
+    }
   }
 
   @override

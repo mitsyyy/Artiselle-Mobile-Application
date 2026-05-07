@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
 import '../../models/user_model.dart';
+import '../../providers/auth_provider.dart';
+import '../../utils/router.dart';
 import '../../utils/validators.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -18,6 +21,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   UserRole _selectedRole = UserRole.buyer;
   bool _obscurePassword = true;
   bool _isLoading = false;
+  String? _errorMessage;
 
   @override
   void dispose() {
@@ -28,11 +32,52 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future<void> _submit() async {
+    setState(() => _errorMessage = null);
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
-    // TODO: wire up AuthProvider.register()
-    await Future.delayed(const Duration(milliseconds: 300));
+
+    final error = await context.read<AuthProvider>().register(
+          email: _emailController.text,
+          password: _passwordController.text,
+          displayName: _displayNameController.text,
+          role: _selectedRole,
+        );
+
+    if (!mounted) return;
     setState(() => _isLoading = false);
+
+    if (error != null) {
+      setState(() => _errorMessage = error);
+      return;
+    }
+
+    _navigateToHome();
+  }
+
+  Future<void> _signInWithGoogle() async {
+    setState(() {
+      _errorMessage = null;
+      _isLoading = true;
+    });
+
+    final error = await context.read<AuthProvider>().signInWithGoogle();
+
+    if (!mounted) return;
+    setState(() => _isLoading = false);
+
+    if (error != null) {
+      setState(() => _errorMessage = error);
+      return;
+    }
+
+    _navigateToHome();
+  }
+
+  void _navigateToHome() {
+    final role = context.read<AuthProvider>().currentUser?.role;
+    final route =
+        role == UserRole.seller ? AppRoutes.sellerHome : AppRoutes.buyerHome;
+    Navigator.pushReplacementNamed(context, route);
   }
 
   @override
@@ -72,6 +117,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ?.copyWith(color: Colors.grey[600]),
                 ),
                 const SizedBox(height: 32),
+
+                // Error banner
+                if (_errorMessage != null) ...[
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.errorContainer,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      _errorMessage!,
+                      style: TextStyle(
+                          color: theme.colorScheme.onErrorContainer),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
 
                 // Display name
                 TextFormField(
@@ -184,11 +246,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ]),
                 const SizedBox(height: 16),
 
-                // Google Sign-In (UI only)
+                // Google Sign-In
                 OutlinedButton.icon(
-                  onPressed: _isLoading ? null : () {
-                    // TODO: wire up AuthProvider.signInWithGoogle()
-                  },
+                  onPressed: _isLoading ? null : _signInWithGoogle,
                   style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14)),
                   icon: SvgPicture.asset(

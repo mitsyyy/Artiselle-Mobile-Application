@@ -6,8 +6,26 @@ import '../../providers/product_provider.dart';
 import '../../providers/store_provider.dart';
 import '../../utils/router.dart';
 
-class SellerDashboardScreen extends StatelessWidget {
+class SellerDashboardScreen extends StatefulWidget {
   const SellerDashboardScreen({super.key});
+
+  @override
+  State<SellerDashboardScreen> createState() => _SellerDashboardScreenState();
+}
+
+class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      final sellerId = context.read<AuthProvider>().currentUser?.uid ?? '';
+      if (sellerId.isNotEmpty) {
+        context.read<ProductProvider>().loadSellerProducts(sellerId);
+        context.read<OrderProvider>().loadOrdersForSeller(sellerId);
+        context.read<StoreProvider>().loadStore(sellerId);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -1,39 +1,63 @@
 import 'package:flutter/material.dart';
 import '../models/store_model.dart';
-
-final _seedStores = {
-  'static-seller-001': StoreModel(
-    uid: 'static-seller-001',
-    storeName: 'My Artisan Shop',
-    description: 'Handmade goods with love.',
-    contactInfo: 'seller@artiselle.com',
-  ),
-};
+import '../services/firestore_service.dart';
 
 class StoreProvider extends ChangeNotifier {
-  final Map<String, StoreModel> _stores = Map.from(_seedStores);
+  final FirestoreService _firestoreService = FirestoreService();
+
+  final Map<String, StoreModel> _stores = {};
+  bool _isLoading = false;
+
+  bool get isLoading => _isLoading;
 
   StoreModel? getStore(String sellerId) => _stores[sellerId];
 
-  /// Returns null on success, or an error message.
-  String? saveStore({
+  /// Fetch a store profile from Firestore and cache it locally.
+  Future<StoreModel?> loadStore(String sellerId) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final store = await _firestoreService.getStore(sellerId);
+      if (store != null) {
+        _stores[sellerId] = store;
+      }
+      _isLoading = false;
+      notifyListeners();
+      return store;
+    } catch (_) {
+      _isLoading = false;
+      notifyListeners();
+      return null;
+    }
+  }
+
+  /// Save (create or update) a store profile. Returns null on success, error message on failure.
+  Future<String?> saveStore({
     required String sellerId,
     required String storeName,
     required String description,
     String? profileImageUrl,
     String? contactInfo,
-  }) {
+  }) async {
     if (storeName.trim().isEmpty) return 'Store name is required.';
     if (description.trim().isEmpty) return 'Description is required.';
 
-    _stores[sellerId] = StoreModel(
+    final store = StoreModel(
       uid: sellerId,
       storeName: storeName.trim(),
       description: description.trim(),
       profileImageUrl: profileImageUrl,
       contactInfo: contactInfo?.trim(),
     );
-    notifyListeners();
-    return null;
+
+    try {
+      await _firestoreService.saveStore(store);
+      _stores[sellerId] = store;
+      notifyListeners();
+      return null;
+    } catch (_) {
+      return 'Failed to save store. Please try again.';
+    }
   }
 }

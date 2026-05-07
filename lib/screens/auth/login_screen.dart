@@ -46,6 +46,29 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
+    _navigateToHome();
+  }
+
+  Future<void> _signInWithGoogle() async {
+    setState(() {
+      _errorMessage = null;
+      _isLoading = true;
+    });
+
+    final error = await context.read<AuthProvider>().signInWithGoogle();
+
+    if (!mounted) return;
+    setState(() => _isLoading = false);
+
+    if (error != null) {
+      setState(() => _errorMessage = error);
+      return;
+    }
+
+    _navigateToHome();
+  }
+
+  void _navigateToHome() {
     final role = context.read<AuthProvider>().currentUser?.role;
     final route =
         role == UserRole.seller ? AppRoutes.sellerHome : AppRoutes.buyerHome;
@@ -186,11 +209,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 ]),
                 const SizedBox(height: 16),
 
-                // Google Sign-In (UI only)
+                // Google Sign-In
                 OutlinedButton.icon(
-                  onPressed: _isLoading ? null : () {
-                    // TODO: wire up AuthProvider.signInWithGoogle()
-                  },
+                  onPressed: _isLoading ? null : _signInWithGoogle,
                   style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14)),
                   icon: SvgPicture.asset(

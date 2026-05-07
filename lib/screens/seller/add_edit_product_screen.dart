@@ -57,7 +57,6 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isSaving = true);
-    await Future.delayed(const Duration(milliseconds: 200));
 
     final provider = context.read<ProductProvider>();
     final user = context.read<AuthProvider>().currentUser!;
@@ -69,34 +68,42 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
         ? 'https://picsum.photos/seed/${DateTime.now().millisecondsSinceEpoch}/400/400'
         : _imageCtrl.text.trim();
 
-    if (_isEditing) {
-      final existing = provider.getById(widget.productId!)!;
-      provider.updateProduct(existing.copyWith(
-        title: _titleCtrl.text.trim(),
-        description: _descCtrl.text.trim(),
-        price: price,
-        categoryId: _selectedCategoryId,
-        stock: stock,
-        imageUrls: [imageUrl],
-      ));
-    } else {
-      provider.addProduct(ProductModel(
-        id: 'prod-${DateTime.now().millisecondsSinceEpoch}',
-        sellerId: user.uid,
-        sellerStoreName: storeName,
-        title: _titleCtrl.text.trim(),
-        description: _descCtrl.text.trim(),
-        price: price,
-        categoryId: _selectedCategoryId ?? kStaticCategories.first.id,
-        stock: stock,
-        imageUrls: [imageUrl],
-        createdAt: DateTime.now(),
-      ));
-    }
+    try {
+      if (_isEditing) {
+        final existing = provider.getById(widget.productId!)!;
+        await provider.updateProduct(existing.copyWith(
+          title: _titleCtrl.text.trim(),
+          description: _descCtrl.text.trim(),
+          price: price,
+          categoryId: _selectedCategoryId,
+          stock: stock,
+          imageUrls: [imageUrl],
+        ));
+      } else {
+        await provider.addProduct(ProductModel(
+          id: '', // Will be assigned by Firestore
+          sellerId: user.uid,
+          sellerStoreName: storeName,
+          title: _titleCtrl.text.trim(),
+          description: _descCtrl.text.trim(),
+          price: price,
+          categoryId: _selectedCategoryId ?? kStaticCategories.first.id,
+          stock: stock,
+          imageUrls: [imageUrl],
+          createdAt: DateTime.now(),
+        ));
+      }
 
-    if (!mounted) return;
-    setState(() => _isSaving = false);
-    Navigator.pop(context);
+      if (!mounted) return;
+      setState(() => _isSaving = false);
+      Navigator.pop(context);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _isSaving = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to save product. Please try again.')),
+      );
+    }
   }
 
   @override

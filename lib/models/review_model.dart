@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class ReviewModel {
   final String id;
   final String productId;
@@ -18,4 +20,26 @@ class ReviewModel {
     required this.feedback,
     required this.createdAt,
   });
+
+  Map<String, dynamic> toMap() => {
+        'productId': productId,
+        'orderId': orderId,
+        'buyerId': buyerId,
+        'buyerDisplayName': buyerDisplayName,
+        'rating': rating,
+        'feedback': feedback,
+        'createdAt': Timestamp.fromDate(createdAt),
+      };
+
+  factory ReviewModel.fromMap(String id, Map<String, dynamic> map) =>
+      ReviewModel(
+        id: id,
+        productId: map['productId'] as String,
+        orderId: map['orderId'] as String,
+        buyerId: map['buyerId'] as String,
+        buyerDisplayName: map['buyerDisplayName'] as String? ?? 'Anonymous',
+        rating: (map['rating'] as num).toInt(),
+        feedback: map['feedback'] as String? ?? '',
+        createdAt: (map['createdAt'] as Timestamp).toDate(),
+      );
 }

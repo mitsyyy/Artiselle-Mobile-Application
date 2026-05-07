@@ -10,9 +10,23 @@ class CategoryModel {
     this.description,
     this.isActive = true,
   });
+
+  Map<String, dynamic> toMap() => {
+        'name': name,
+        'description': description,
+        'isActive': isActive,
+      };
+
+  factory CategoryModel.fromMap(String id, Map<String, dynamic> map) =>
+      CategoryModel(
+        id: id,
+        name: map['name'] as String,
+        description: map['description'] as String?,
+        isActive: map['isActive'] as bool? ?? true,
+      );
 }
 
-// Static seed categories
+// Static seed categories (used as fallback if Firestore categories collection is empty)
 final kStaticCategories = [
   const CategoryModel(id: 'cat-1', name: 'Handmade Goods'),
   const CategoryModel(id: 'cat-2', name: 'Clothing'),

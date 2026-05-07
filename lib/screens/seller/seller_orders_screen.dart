@@ -5,22 +5,45 @@ import '../../providers/auth_provider.dart';
 import '../../providers/order_provider.dart';
 import '../../utils/router.dart';
 
-class SellerOrdersScreen extends StatelessWidget {
+class SellerOrdersScreen extends StatefulWidget {
   const SellerOrdersScreen({super.key});
+
+  @override
+  State<SellerOrdersScreen> createState() => _SellerOrdersScreenState();
+}
+
+class _SellerOrdersScreenState extends State<SellerOrdersScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      final sellerId = context.read<AuthProvider>().currentUser?.uid ?? '';
+      if (sellerId.isNotEmpty) {
+        context.read<OrderProvider>().loadOrdersForSeller(sellerId);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final sellerId = context.watch<AuthProvider>().currentUser?.uid ?? '';
-    final orders = context.watch<OrderProvider>().ordersForSeller(sellerId);
+    final orderProvider = context.watch<OrderProvider>();
+    final orders = orderProvider.ordersForSeller(sellerId);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Incoming Orders')),
-      body: orders.isEmpty
-          ? const Center(child: Text('No orders yet.'))
-          : ListView.builder(
-              itemCount: orders.length,
-              itemBuilder: (_, i) => _OrderTile(order: orders[i]),
-            ),
+      body: orderProvider.isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : orders.isEmpty
+              ? const Center(child: Text('No orders yet.'))
+              : RefreshIndicator(
+                  onRefresh: () =>
+                      context.read<OrderProvider>().loadOrdersForSeller(sellerId),
+                  child: ListView.builder(
+                    itemCount: orders.length,
+                    itemBuilder: (_, i) => _OrderTile(order: orders[i]),
+                  ),
+                ),
     );
   }
 }
@@ -34,7 +57,7 @@ class _OrderTile extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       child: ListTile(
-        title: Text('Order #${order.id.split('-').last}',
+        title: Text('Order #${order.id.substring(order.id.length > 6 ? order.id.length - 6 : 0)}',
             style: const TextStyle(fontWeight: FontWeight.bold)),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

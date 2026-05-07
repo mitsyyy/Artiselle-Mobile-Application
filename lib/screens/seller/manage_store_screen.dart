@@ -38,10 +38,9 @@ class _ManageStoreScreenState extends State<ManageStoreScreen> {
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isSaving = true);
-    await Future.delayed(const Duration(milliseconds: 300));
 
     final uid = context.read<AuthProvider>().currentUser?.uid ?? '';
-    final error = context.read<StoreProvider>().saveStore(
+    final error = await context.read<StoreProvider>().saveStore(
           sellerId: uid,
           storeName: _nameCtrl.text,
           description: _descCtrl.text,

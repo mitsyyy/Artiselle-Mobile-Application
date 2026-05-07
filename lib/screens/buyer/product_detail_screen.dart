@@ -7,17 +7,31 @@ import '../../widgets/cart_badge.dart';
 import '../../widgets/review_tile.dart';
 import '../../widgets/star_rating.dart';
 
-class ProductDetailScreen extends StatelessWidget {
+class ProductDetailScreen extends StatefulWidget {
   final String productId;
   const ProductDetailScreen({super.key, required this.productId});
 
   @override
+  State<ProductDetailScreen> createState() => _ProductDetailScreenState();
+}
+
+class _ProductDetailScreenState extends State<ProductDetailScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Load reviews from Firestore
+    Future.microtask(() {
+      context.read<ProductProvider>().loadReviews(widget.productId);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final product = context.watch<ProductProvider>().getById(productId);
+    final product = context.watch<ProductProvider>().getById(widget.productId);
     if (product == null) {
       return const Scaffold(body: Center(child: Text('Product not found.')));
     }
-    final reviews = context.watch<ProductProvider>().getReviews(productId);
+    final reviews = context.watch<ProductProvider>().getReviews(widget.productId);
 
     return Scaffold(
       appBar: AppBar(
@@ -32,7 +46,7 @@ class ProductDetailScreen extends StatelessWidget {
             AspectRatio(
               aspectRatio: 1,
               child: Image.network(
-                product.imageUrls.first,
+                product.imageUrls.isNotEmpty ? product.imageUrls.first : '',
                 fit: BoxFit.cover,
                 errorBuilder: (_, __, ___) =>
                     const ColoredBox(color: Color(0xFFE0D8D0),
