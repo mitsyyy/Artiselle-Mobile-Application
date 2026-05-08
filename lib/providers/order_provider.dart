@@ -54,12 +54,37 @@ class OrderProvider extends ChangeNotifier {
 
   Future<void> updateStatus(String orderId, ShipmentStatus status) async {
     try {
-      await _firestoreService.updateOrderStatus(orderId, status);
       final idx = _orders.indexWhere((o) => o.id == orderId);
-      if (idx != -1) {
-        _orders[idx] = _orders[idx].copyWith(status: status);
-        notifyListeners();
+      if (idx == -1) return;
+
+      final order = _orders[idx];
+      final oldStatus = order.status;
+
+      // Update status in Firestore
+      await _firestoreService.updateOrderStatus(orderId, status);
+
+      // Stock adjustment:
+      // - Decrease stock when moving from pending → processing (order accepted)
+      // - Restore stock when cancelling a previously accepted order
+      if (oldStatus == ShipmentStatus.pending &&
+          status == ShipmentStatus.processing) {
+        // Decrease stock for each item in the order
+        for (final item in order.items) {
+          await _firestoreService.adjustProductStock(
+              item.productId, -item.quantity);
+        }
+      } else if (status == ShipmentStatus.cancelled &&
+          oldStatus != ShipmentStatus.pending &&
+          oldStatus != ShipmentStatus.cancelled) {
+        // Restore stock if cancelling after it was already decreased
+        for (final item in order.items) {
+          await _firestoreService.adjustProductStock(
+              item.productId, item.quantity);
+        }
       }
+
+      _orders[idx] = _orders[idx].copyWith(status: status);
+      notifyListeners();
     } catch (_) {
       rethrow;
     }

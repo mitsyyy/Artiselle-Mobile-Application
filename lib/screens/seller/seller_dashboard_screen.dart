@@ -40,6 +40,7 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: Text(store?.storeName ?? 'My Store'),
         actions: [
           IconButton(

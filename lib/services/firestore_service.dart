@@ -72,6 +72,14 @@ class FirestoreService {
     await _db.collection('products').doc(productId).delete();
   }
 
+  /// Atomically adjust a product's stock by [delta].
+  /// Use negative values to decrease, positive to restore.
+  Future<void> adjustProductStock(String productId, int delta) async {
+    await _db.collection('products').doc(productId).update({
+      'stock': FieldValue.increment(delta),
+    });
+  }
+
   // ── Orders ────────────────────────────────────────────────────────────────────
 
   /// Fetch orders for a buyer, newest first.
