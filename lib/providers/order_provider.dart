@@ -17,8 +17,9 @@ class OrderProvider extends ChangeNotifier {
 
     try {
       _orders = await _firestoreService.getOrdersForBuyer(buyerId);
-    } catch (_) {
-      // Silently fail
+      debugPrint('loadOrdersForBuyer: loaded ${_orders.length} orders');
+    } catch (e) {
+      debugPrint('loadOrdersForBuyer error: $e');
     }
 
     _isLoading = false;
@@ -32,8 +33,9 @@ class OrderProvider extends ChangeNotifier {
 
     try {
       _orders = await _firestoreService.getOrdersForSeller(sellerId);
-    } catch (_) {
-      // Silently fail
+      debugPrint('loadOrdersForSeller: loaded ${_orders.length} orders');
+    } catch (e) {
+      debugPrint('loadOrdersForSeller error: $e');
     }
 
     _isLoading = false;

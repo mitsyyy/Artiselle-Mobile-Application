@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../screens/auth/auth_gate_screen.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/auth/register_screen.dart';
 import '../screens/auth/forgot_password_screen.dart';
@@ -22,6 +23,7 @@ import '../screens/seller/sales_report_screen.dart';
 import '../screens/shared/account_settings_screen.dart';
 
 class AppRoutes {
+  static const authGate = '/';
   static const login = '/login';
   static const register = '/register';
   static const forgotPassword = '/forgot-password';
@@ -48,6 +50,8 @@ class AppRoutes {
 
 Route<dynamic> generateRoute(RouteSettings settings) {
   switch (settings.name) {
+    case AppRoutes.authGate:
+      return MaterialPageRoute(builder: (_) => const AuthGateScreen());
     case AppRoutes.login:
       return MaterialPageRoute(builder: (_) => const LoginScreen());
     case AppRoutes.register:

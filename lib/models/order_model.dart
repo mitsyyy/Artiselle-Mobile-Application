@@ -28,10 +28,10 @@ class OrderItem {
       };
 
   factory OrderItem.fromMap(Map<String, dynamic> map) => OrderItem(
-        productId: map['productId'] as String,
-        productTitle: map['productTitle'] as String,
-        unitPrice: (map['unitPrice'] as num).toDouble(),
-        quantity: (map['quantity'] as num).toInt(),
+        productId: map['productId'] as String? ?? '',
+        productTitle: map['productTitle'] as String? ?? 'Unknown Product',
+        unitPrice: (map['unitPrice'] as num?)?.toDouble() ?? 0.0,
+        quantity: (map['quantity'] as num?)?.toInt() ?? 1,
         imageUrl: map['imageUrl'] as String?,
       );
 }
@@ -70,22 +70,31 @@ class OrderModel {
         'createdAt': Timestamp.fromDate(createdAt),
       };
 
-  factory OrderModel.fromMap(String id, Map<String, dynamic> map) =>
-      OrderModel(
-        id: id,
-        buyerId: map['buyerId'] as String,
-        sellerId: map['sellerId'] as String,
-        items: (map['items'] as List<dynamic>)
-            .map((i) => OrderItem.fromMap(i as Map<String, dynamic>))
-            .toList(),
-        totalAmount: (map['totalAmount'] as num).toDouble(),
-        shippingAddress: map['shippingAddress'] as String,
-        paymentMethod: map['paymentMethod'] as String,
-        status: ShipmentStatus.values
-            .firstWhere((s) => s.name == map['status'],
-                orElse: () => ShipmentStatus.pending),
-        createdAt: (map['createdAt'] as Timestamp).toDate(),
-      );
+  factory OrderModel.fromMap(String id, Map<String, dynamic> map) {
+    DateTime parseDate(dynamic d) {
+      if (d is Timestamp) return d.toDate();
+      if (d is String) return DateTime.parse(d);
+      return DateTime.now();
+    }
+
+    return OrderModel(
+      id: id,
+      buyerId: map['buyerId'] as String? ?? '',
+      sellerId: map['sellerId'] as String? ?? '',
+      items: (map['items'] as List<dynamic>?)
+              ?.map((i) => OrderItem.fromMap(i as Map<String, dynamic>))
+              .toList() ??
+          [],
+      totalAmount: (map['totalAmount'] as num?)?.toDouble() ?? 0.0,
+      shippingAddress: map['shippingAddress'] as String? ?? 'No address provided',
+      paymentMethod: map['paymentMethod'] as String? ?? 'Unknown',
+      status: ShipmentStatus.values.firstWhere(
+        (s) => s.name == map['status'],
+        orElse: () => ShipmentStatus.pending,
+      ),
+      createdAt: parseDate(map['createdAt']),
+    );
+  }
 
   OrderModel copyWith({ShipmentStatus? status}) => OrderModel(
         id: id,

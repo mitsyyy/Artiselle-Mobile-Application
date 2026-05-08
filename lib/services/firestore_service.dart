@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import '../models/product_model.dart';
 import '../models/order_model.dart';
 import '../models/review_model.dart';
@@ -84,26 +85,54 @@ class FirestoreService {
 
   /// Fetch orders for a buyer, newest first.
   Future<List<OrderModel>> getOrdersForBuyer(String buyerId) async {
-    final snapshot = await _db
-        .collection('orders')
-        .where('buyerId', isEqualTo: buyerId)
-        .orderBy('createdAt', descending: true)
-        .get();
-    return snapshot.docs
+    QuerySnapshot<Map<String, dynamic>> snapshot;
+    try {
+      snapshot = await _db
+          .collection('orders')
+          .where('buyerId', isEqualTo: buyerId)
+          .orderBy('createdAt', descending: true)
+          .get();
+    } catch (e) {
+      debugPrint('Firestore: Missing index for buyer orders, falling back to manual sort. Error: $e');
+      snapshot = await _db
+          .collection('orders')
+          .where('buyerId', isEqualTo: buyerId)
+          .get();
+    }
+
+    final orders = snapshot.docs
         .map((doc) => OrderModel.fromMap(doc.id, doc.data()))
         .toList();
+
+    // Manual sort if index was missing
+    orders.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    return orders;
   }
 
   /// Fetch orders for a seller, newest first.
   Future<List<OrderModel>> getOrdersForSeller(String sellerId) async {
-    final snapshot = await _db
-        .collection('orders')
-        .where('sellerId', isEqualTo: sellerId)
-        .orderBy('createdAt', descending: true)
-        .get();
-    return snapshot.docs
+    QuerySnapshot<Map<String, dynamic>> snapshot;
+    try {
+      snapshot = await _db
+          .collection('orders')
+          .where('sellerId', isEqualTo: sellerId)
+          .orderBy('createdAt', descending: true)
+          .get();
+    } catch (e) {
+      debugPrint('Firestore: Missing index for seller orders, falling back to manual sort. Error: $e');
+      snapshot = await _db
+          .collection('orders')
+          .where('sellerId', isEqualTo: sellerId)
+          .get();
+    }
+
+    final orders = snapshot.docs
         .map((doc) => OrderModel.fromMap(doc.id, doc.data()))
         .toList();
+
+    // Manual sort if index was missing
+    orders.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    return orders;
   }
 
   /// Fetch a single order by ID.

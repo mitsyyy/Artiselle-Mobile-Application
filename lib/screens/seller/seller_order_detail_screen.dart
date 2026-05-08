@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/order_model.dart';
+import '../../providers/auth_provider.dart';
 import '../../providers/order_provider.dart';
+import '../../providers/product_provider.dart';
 
 class SellerOrderDetailScreen extends StatelessWidget {
   final String orderId;
@@ -73,7 +75,7 @@ class _StatusSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final provider = context.read<OrderProvider>();
+    final orderProvider = context.read<OrderProvider>();
     return Column(
       children: ShipmentStatus.values.map((status) {
         final label =
@@ -82,12 +84,20 @@ class _StatusSelector extends StatelessWidget {
           title: Text(label),
           value: status,
           groupValue: order.status,
-          onChanged: (v) {
+          onChanged: (v) async {
             if (v != null) {
-              provider.updateStatus(order.id, v);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Status updated to $label')),
-              );
+              await orderProvider.updateStatus(order.id, v);
+              // Reload seller products so updated stock is visible
+              if (context.mounted) {
+                final sellerId =
+                    context.read<AuthProvider>().currentUser?.uid ?? '';
+                if (sellerId.isNotEmpty) {
+                  context.read<ProductProvider>().loadSellerProducts(sellerId);
+                }
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Status updated to $label')),
+                );
+              }
             }
           },
         );

@@ -98,13 +98,11 @@ class _SalesReportScreenState extends State<SalesReportScreen> {
                 style: TextStyle(color: Colors.grey))
           else
             ...productIds.map((pid) {
-              final product = products.firstWhere(
-                (p) => p.id == pid,
-                orElse: () => products.isNotEmpty
-                    ? products.first
-                    : throw StateError('no products'),
-              );
-              final title = product.title;
+              final productIndex = products.indexWhere((p) => p.id == pid);
+              final title = productIndex != -1 
+                  ? products[productIndex].title 
+                  : 'Deleted Product ($pid)';
+              
               final units = unitsSold[pid] ?? 0;
               final rev = revenueByProduct[pid] ?? 0;
               return Card(

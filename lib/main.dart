@@ -54,7 +54,7 @@ class ArtiselleApp extends StatelessWidget {
         ),
       ),
       onGenerateRoute: generateRoute,
-      initialRoute: AppRoutes.login,
+      initialRoute: AppRoutes.authGate,
     );
   }
 }
