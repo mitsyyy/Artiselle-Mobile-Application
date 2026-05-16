@@ -1,4 +1,4 @@
-enum UserRole { buyer, seller }
+enum UserRole { buyer, seller, admin }
 
 class UserModel {
   final String uid;
@@ -44,7 +44,7 @@ class UserModel {
         uid: uid,
         email: map['email'] as String,
         displayName: map['displayName'] as String,
-        role: UserRole.values.firstWhere((r) => r.name == map['role']),
+        role: UserRole.values.firstWhere((r) => r.name == map['role'], orElse: () => UserRole.buyer),
         emailVerified: map['emailVerified'] as bool,
         createdAt: DateTime.parse(map['createdAt'] as String),
         storeName: map['storeName'] as String?,

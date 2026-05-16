@@ -29,9 +29,14 @@ class _AuthGateScreenState extends State<AuthGateScreen> {
 
     if (authProvider.isLoggedIn) {
       final role = authProvider.currentUser?.role;
-      final route = role == UserRole.seller
-          ? AppRoutes.sellerHome
-          : AppRoutes.buyerHome;
+      String route;
+      if (role == UserRole.admin) {
+        route = AppRoutes.adminDashboard;
+      } else if (role == UserRole.seller) {
+        route = AppRoutes.sellerHome;
+      } else {
+        route = AppRoutes.buyerHome;
+      }
       Navigator.pushReplacementNamed(context, route);
     } else {
       Navigator.pushReplacementNamed(context, AppRoutes.login);

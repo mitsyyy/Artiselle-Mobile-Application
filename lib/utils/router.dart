@@ -21,6 +21,10 @@ import '../screens/seller/seller_orders_screen.dart';
 import '../screens/seller/seller_order_detail_screen.dart';
 import '../screens/seller/sales_report_screen.dart';
 import '../screens/shared/account_settings_screen.dart';
+import '../screens/admin/admin_dashboard_screen.dart';
+import '../screens/admin/user_management_screen.dart';
+import '../screens/admin/admin_product_management_screen.dart';
+import '../screens/admin/admin_order_management_screen.dart';
 
 class AppRoutes {
   static const authGate = '/';
@@ -39,6 +43,11 @@ class AppRoutes {
   static const storeProfile = '/buyer/store';
   static const writeReview = '/buyer/write-review';
   static const accountSettings = '/account/settings';
+  // Admin routes
+  static const adminDashboard = '/admin/dashboard';
+  static const adminUsers = '/admin/users';
+  static const adminProducts = '/admin/products';
+  static const adminOrders = '/admin/orders';
   // Seller routes
   static const manageStore = '/seller/store';
   static const sellerProducts = '/seller/products';
@@ -92,6 +101,15 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       );
     case AppRoutes.accountSettings:
       return MaterialPageRoute(builder: (_) => const AccountSettingsScreen());
+    // Admin
+    case AppRoutes.adminDashboard:
+      return MaterialPageRoute(builder: (_) => const AdminDashboardScreen());
+    case AppRoutes.adminUsers:
+      return MaterialPageRoute(builder: (_) => const UserManagementScreen());
+    case AppRoutes.adminProducts:
+      return MaterialPageRoute(builder: (_) => const AdminProductManagementScreen());
+    case AppRoutes.adminOrders:
+      return MaterialPageRoute(builder: (_) => const AdminOrderManagementScreen());
     // Seller
     case AppRoutes.manageStore:
       return MaterialPageRoute(builder: (_) => const ManageStoreScreen());

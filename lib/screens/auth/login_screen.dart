@@ -70,8 +70,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _navigateToHome() {
     final role = context.read<AuthProvider>().currentUser?.role;
-    final route =
-        role == UserRole.seller ? AppRoutes.sellerHome : AppRoutes.buyerHome;
+    String route;
+    if (role == UserRole.admin) {
+      route = AppRoutes.adminDashboard;
+    } else if (role == UserRole.seller) {
+      route = AppRoutes.sellerHome;
+    } else {
+      route = AppRoutes.buyerHome;
+    }
     Navigator.pushReplacementNamed(context, route);
   }
 
