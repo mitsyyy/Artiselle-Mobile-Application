@@ -197,6 +197,19 @@ class FirestoreService {
 
   /// Create or update a store profile.
   Future<void> saveStore(StoreModel store) async {
+    // Save to stores collection
     await _db.collection('stores').doc(store.uid).set(store.toMap());
+    
+    // Sync seller profile data to the users collection as well
+    try {
+      await _db.collection('users').doc(store.uid).update({
+        'storeName': store.storeName,
+        'storeDescription': store.description,
+        'contactInfo': store.contactInfo,
+        'profileImageUrl': store.profileImageUrl,
+      });
+    } catch (e) {
+      debugPrint('Firestore: Failed to sync store profile to users collection. Error: $e');
+    }
   }
 }

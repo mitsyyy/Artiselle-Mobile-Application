@@ -119,28 +119,77 @@ class UserManagementScreen extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('User Details'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('ID: ${user.uid}'),
-            const SizedBox(height: 8),
-            Text('Email: ${user.email}'),
-            const SizedBox(height: 8),
-            Text('Verified: ${user.emailVerified ? 'Yes' : 'No'}'),
-            const SizedBox(height: 8),
-            Text('Joined: ${user.createdAt.toString().split('.').first}'),
-            if (user.role.name == 'seller') ...[
-              const Divider(),
-              Text('Store Name: ${user.storeName ?? 'N/A'}'),
-              Text('Contact Info: ${user.contactInfo ?? 'N/A'}'),
-            ]
-          ],
+        content: SizedBox(
+          width: double.maxFinite,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildDetailRow('ID', user.uid),
+                _buildDetailRow('Email', user.email),
+                _buildDetailRow('Verified', user.emailVerified ? 'Yes' : 'No'),
+                _buildDetailRow('Joined', user.createdAt.toString().split('.').first),
+                if (user.role == UserRole.seller) ...[
+                  const Divider(height: 24),
+                  const Text('Seller Information', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.deepPurple)),
+                  const SizedBox(height: 12),
+                  FutureBuilder<DocumentSnapshot>(
+                    future: FirebaseFirestore.instance.collection('stores').doc(user.uid).get(),
+                    builder: (context, storeSnap) {
+                      if (storeSnap.connectionState == ConnectionState.waiting) {
+                        return const Center(child: Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: SizedBox(height: 24, width: 24, child: CircularProgressIndicator(strokeWidth: 2)),
+                        ));
+                      }
+                      if (!storeSnap.hasData || !storeSnap.data!.exists || storeSnap.data!.data() == null) {
+                        return const Text('Store profile not set up yet.', style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey));
+                      }
+                      
+                      final storeData = storeSnap.data!.data() as Map<String, dynamic>;
+                      final storeName = storeData['storeName'] as String? ?? 'Not provided';
+                      final contactInfo = storeData['contactInfo'] as String? ?? 'Not provided';
+                      final description = storeData['description'] as String?;
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildDetailRow('Store Name', storeName),
+                          _buildDetailRow('Contact', contactInfo),
+                          if (description != null && description.isNotEmpty)
+                            _buildDetailRow('Description', description),
+                        ],
+                      );
+                    },
+                  ),
+                ]
+              ],
+            ),
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 80,
+            child: Text(label, style: TextStyle(color: Colors.grey[600], fontSize: 13, fontWeight: FontWeight.w500)),
+          ),
+          Expanded(
+            child: Text(value, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13)),
           ),
         ],
       ),
