@@ -50,7 +50,10 @@ class AdminDashboardScreen extends StatelessWidget {
             pinned: true,
             elevation: 0,
             backgroundColor: Colors.deepPurple,
+            automaticallyImplyLeading: false,
+            centerTitle: true,
             flexibleSpace: FlexibleSpaceBar(
+              centerTitle: true,
               title: const Text('Admin Console', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
               background: Container(
                 decoration: const BoxDecoration(
