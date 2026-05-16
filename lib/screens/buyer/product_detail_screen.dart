@@ -126,18 +126,43 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           : SafeArea(
               child: Padding(
                 padding: const EdgeInsets.all(16),
-                child: FilledButton.icon(
-                  icon: const Icon(Icons.add_shopping_cart),
-                  label: const Text('Add to Cart'),
-                  style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14)),
-                  onPressed: () {
-                    final msg = context.read<CartProvider>().addToCart(product);
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text(msg ?? 'Added to cart'),
-                      duration: const Duration(seconds: 2),
-                    ));
-                  },
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        icon: const Icon(Icons.add_shopping_cart),
+                        label: const Text('Add to Cart'),
+                        style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 14)),
+                        onPressed: () {
+                          final msg = context.read<CartProvider>().addToCart(product);
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text(msg ?? 'Added to cart'),
+                            duration: const Duration(seconds: 2),
+                          ));
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: FilledButton.icon(
+                        icon: const Icon(Icons.shopping_bag_outlined),
+                        label: const Text('Buy Now'),
+                        style: FilledButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 14)),
+                        onPressed: () {
+                          final msg = context.read<CartProvider>().addToCart(product);
+                          if (msg != null) {
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              content: Text(msg),
+                              duration: const Duration(seconds: 2),
+                            ));
+                          }
+                          Navigator.pushNamed(context, AppRoutes.checkout);
+                        },
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
