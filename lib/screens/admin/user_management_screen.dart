@@ -30,53 +30,80 @@ class UserManagementScreen extends StatelessWidget {
 
           return SingleChildScrollView(
             scrollDirection: Axis.vertical,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
+            child: SizedBox(
+              width: double.infinity,
               child: DataTable(
+                columnSpacing: 12,
+                horizontalMargin: 12,
                 headingRowColor: MaterialStateProperty.all(Colors.deepPurple.shade50),
                 columns: const [
-                  DataColumn(label: Text('Avatar')),
-                  DataColumn(label: Text('Name')),
-                  DataColumn(label: Text('Email')),
-                  DataColumn(label: Text('Role')),
-                  DataColumn(label: Text('Actions')),
+                  DataColumn(label: Text('User Details', style: TextStyle(fontWeight: FontWeight.bold))),
+                  DataColumn(label: Text('Role', style: TextStyle(fontWeight: FontWeight.bold))),
+                  DataColumn(label: Text('', style: TextStyle(fontWeight: FontWeight.bold))),
                 ],
                 rows: users.map((user) {
                   return DataRow(cells: [
                     DataCell(
-                      CircleAvatar(
-                        backgroundColor: Colors.deepPurple.shade100,
-                        foregroundColor: Colors.deepPurple.shade800,
-                        child: Text(user.displayName.isNotEmpty ? user.displayName.substring(0, 1).toUpperCase() : '?'),
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.45,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              user.displayName.isNotEmpty ? user.displayName : 'No Name', 
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14), 
+                              maxLines: 1, 
+                              overflow: TextOverflow.ellipsis
+                            ),
+                            Text(
+                              user.email, 
+                              style: TextStyle(fontSize: 12, color: Colors.grey[600]), 
+                              maxLines: 1, 
+                              overflow: TextOverflow.ellipsis
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                    DataCell(Text(user.displayName.isNotEmpty ? user.displayName : 'No Name')),
-                    DataCell(Text(user.email)),
                     DataCell(
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
                         decoration: BoxDecoration(
-                          color: user.role.name == 'admin' ? Colors.red.shade100 : Colors.blue.shade100,
-                          borderRadius: BorderRadius.circular(8),
+                          color: user.role.name == 'admin' ? Colors.red.shade50 : Colors.deepPurple.shade50,
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(color: user.role.name == 'admin' ? Colors.red.shade200 : Colors.deepPurple.shade200),
                         ),
-                        child: Text(user.role.name.toUpperCase(), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                        child: Text(
+                          user.role.name.toUpperCase(), 
+                          style: TextStyle(
+                            fontSize: 10, 
+                            fontWeight: FontWeight.bold, 
+                            color: user.role.name == 'admin' ? Colors.red.shade700 : Colors.deepPurple.shade700
+                          )
+                        ),
                       ),
                     ),
-                    DataCell(Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.info_outline, color: Colors.deepPurple),
-                          onPressed: () => _viewUserDetails(context, user),
-                          tooltip: 'View Details',
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.delete_outline, color: Colors.red),
-                          onPressed: () => _deleteUser(context, user.uid),
-                          tooltip: 'Delete User',
-                        ),
-                      ],
-                    )),
+                    DataCell(
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                            icon: const Icon(Icons.info_outline, color: Colors.deepPurple, size: 22),
+                            onPressed: () => _viewUserDetails(context, user),
+                          ),
+                          const SizedBox(width: 16),
+                          IconButton(
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                            icon: const Icon(Icons.delete_outline, color: Colors.red, size: 22),
+                            onPressed: () => _deleteUser(context, user.uid),
+                          ),
+                        ],
+                      ),
+                    ),
                   ]);
                 }).toList(),
               ),
